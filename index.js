@@ -1,6 +1,7 @@
 require('dotenv').config();
 const Grammarbot = require('grammarbot');
 const Discord = require('discord.js');
+const logger = require('./src/logger');
 const {
   misspelling
 } = require('./src/match-handlers');
@@ -12,8 +13,18 @@ const checker = new Grammarbot({
   'language': 'en-GB'
 });
 
+client.login(process.env.DISCORD_TOKEN);
+
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+  logger.info({message: `Logged in as ${client.user.tag}!`});
+});
+
+client.on('error', error => {
+  logger.error('Error Occurred', error);
+});
+
+client.on('disconnect', async () => {
+  logger.warn('Socket disconnected');
 });
 
 client.on('message', async msg => {
@@ -23,7 +34,7 @@ client.on('message', async msg => {
     if (result && result.matches && result.matches.length > 0) {
       msg.react('💔');
       result.matches.forEach(match => {
-        console.log(match);
+        logger.info(match);
         const message = handleMatch(match);
         msg.reply(message ? message : match.message);
       });
@@ -34,8 +45,6 @@ client.on('message', async msg => {
     }
   }
 });
-
-client.login(process.env.DISCORD_TOKEN);
 
 function handleMatch(match) {
   if (match.rule.issueType === 'misspelling') {
