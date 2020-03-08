@@ -1,6 +1,11 @@
 require('dotenv').config();
 const Grammarbot = require('grammarbot');
 const Discord = require('discord.js');
+const {
+  misspelling
+} = require('./src/match-handlers');
+
+
 const client = new Discord.Client();
 const checker = new Grammarbot({
   'api_key' : process.env.GRAMMAR_BOT_API_KEY,
@@ -19,6 +24,9 @@ client.on('message', async msg => {
       msg.react('broken_heart');
       result.matches.forEach(match => {
         msg.reply(match.message);
+        console.log(match);
+        const message = handleMatch(match);
+        msg.reply(message ? message : match.message);
       });
 
     } else {
@@ -29,3 +37,9 @@ client.on('message', async msg => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+function handleMatch(match) {
+  if (match.rule.issueType === 'misspelling') {
+    return misspelling(match);
+  }
+}
