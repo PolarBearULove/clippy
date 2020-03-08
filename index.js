@@ -16,11 +16,14 @@ client.on('message', async msg => {
     const result = await checker.checkAsync(msg.content);
 
     if (result && result.matches && result.matches.length > 0) {
-
+      msg.react('broken_heart');
       result.matches.forEach(match => {
-        console.log(match);
         msg.reply(match.message);
       });
+
+    } else {
+      msg.react('heart');
+      msg.reply('congratulations! Your message was found to have no spelling or grammar errors at all. This is good enough to go on the fridge!');
     }
   }
 });
