@@ -21,12 +21,16 @@ client.on('message', async msg => {
     const result = await checker.checkAsync(msg.content);
 
     if (result && result.matches && result.matches.length > 0) {
-
+      msg.react('💔');
       result.matches.forEach(match => {
         console.log(match);
         const message = handleMatch(match);
         msg.reply(message ? message : match.message);
       });
+
+    } else {
+      msg.react('💖');
+      msg.reply('congratulations! Your message was found to have no spelling or grammar errors at all. This is good enough to go on the fridge!');
     }
   }
 });
@@ -37,4 +41,6 @@ function handleMatch(match) {
   if (match.rule.issueType === 'misspelling') {
     return misspelling(match);
   }
+
+  return match.message;
 }
