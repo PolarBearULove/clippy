@@ -1,3 +1,4 @@
 module.exports = {
-  misspelling: require('./misspelling')
+  misspelling: require('./misspelling'),
+  profanity: require('./profanity')
 };

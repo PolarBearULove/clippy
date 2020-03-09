@@ -2,6 +2,9 @@ const {
   bold,
   strikethrough
 } = require('../textFormatting');
+const {
+  getMistake
+} = require('../utils');
 
 function misspelling(match) {
   // Initialise message with heading
@@ -18,9 +21,8 @@ function heading() {
 }
 
 function quotedMistake(match) {
-  const {text, offset, length} = match.context;
-  // Get mistake from text section
-  const mistake = text.slice(offset, offset + length);
+  const { text } = match.context;
+  const mistake = getMistake(match.context);
   const highlightedMistake = strikethrough(mistake);
 
   return `> ${text.replace(mistake, highlightedMistake)}`;

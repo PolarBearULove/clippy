@@ -3,7 +3,8 @@ const Grammarbot = require('grammarbot');
 const Discord = require('discord.js');
 const logger = require('./src/logger');
 const {
-  misspelling
+  misspelling,
+  profanity
 } = require('./src/match-handlers');
 
 
@@ -49,6 +50,8 @@ client.on('message', async msg => {
 function handleMatch(match) {
   if (match.rule.issueType === 'misspelling') {
     return misspelling(match);
+  } else if (match.rule.id === 'PROFANITY') {
+    return profanity(match);
   }
 
   return match.message;
