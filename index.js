@@ -13,6 +13,7 @@ const checker = new Grammarbot({
   'api_key' : process.env.GRAMMAR_BOT_API_KEY,
   'language': 'en-GB'
 });
+const fetch = require('node-fetch');
 
 client.login(process.env.DISCORD_TOKEN);
 
@@ -29,7 +30,20 @@ client.on('disconnect', async () => {
 });
 
 client.on('message', async msg => {
-  if (msg.author.id !== client.user.id) {
+  if (msg.mentions.has(client.user.id)) {
+    const foaasRes = await fetch(
+      'https://foaas.com/asshole/clippy',
+      {
+        headers: { 'Accept': 'application/json' }
+      }
+    );
+    try{
+      const json = await foaasRes.json();
+      msg.reply(json.message);
+    } catch(error) {
+      logger.error(error);
+    }
+  } else if (msg.author.id !== client.user.id) {
     const result = await checker.checkAsync(msg.content);
 
     if (result && result.matches && result.matches.length > 0) {
