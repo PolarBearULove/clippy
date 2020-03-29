@@ -7,6 +7,7 @@ const {
   profanity
 } = require('./src/match-handlers');
 
+const BLACKLISTED_CHANNELS = [];
 
 const client = new Discord.Client();
 const checker = new Grammarbot({
@@ -30,33 +31,35 @@ client.on('disconnect', async () => {
 });
 
 client.on('message', async msg => {
-  if (msg.mentions.has(client.user.id)) {
-    const foaasRes = await fetch(
-      'https://foaas.com/asshole/clippy',
-      {
-        headers: { 'Accept': 'application/json' }
+  if (allowedInChannel(msg.channel.id)) {
+    if (msg.mentions.has(client.user.id)) {
+      const foaasRes = await fetch(
+        'https://foaas.com/asshole/clippy',
+        {
+          headers: { 'Accept': 'application/json' }
+        }
+      );
+      try {
+        const json = await foaasRes.json();
+        msg.reply(json.message);
+      } catch(error) {
+        logger.error(error);
       }
-    );
-    try{
-      const json = await foaasRes.json();
-      msg.reply(json.message);
-    } catch(error) {
-      logger.error(error);
-    }
-  } else if (msg.author.id !== client.user.id) {
-    const result = await checker.checkAsync(msg.content);
+    } else if (msg.author.id !== client.user.id) {
+      const result = await checker.checkAsync(msg.content);
 
-    if (result && result.matches && result.matches.length > 0) {
-      msg.react('💔');
-      result.matches.forEach(match => {
-        logger.info(match);
-        const message = handleMatch(match);
-        msg.reply(message ? message : match.message);
-      });
+      if (result && result.matches && result.matches.length > 0) {
+        msg.react('💔');
+        result.matches.forEach(match => {
+          logger.info(match);
+          const message = handleMatch(match);
+          msg.reply(message ? message : match.message);
+        });
 
-    } else {
-      msg.react('💖');
-      msg.reply('congratulations! Your message was found to have no spelling or grammar errors at all. This is good enough to go on the fridge!');
+      } else {
+        msg.react('💖');
+        msg.reply('congratulations! Your message was found to have no spelling or grammar errors at all. This is good enough to go on the fridge!');
+      }
     }
   }
 });
@@ -69,4 +72,8 @@ function handleMatch(match) {
   }
 
   return match.message;
+}
+
+function allowedInChannel(channelID) {
+  return !BLACKLISTED_CHANNELS.includes(channelID);
 }
